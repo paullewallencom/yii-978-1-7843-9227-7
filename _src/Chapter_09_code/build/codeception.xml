@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="codeception" basedir=".">
+
+    <property name="tests.basedir" value="${basedir}/tests"/>
+    <property name="codeception.basedir" value="${tests.basedir}/codeception"/>
+    <property name="codeception.script" value="${basedir}/vendor/bin/codecept"/>
+    <property name="codeception.suites.default" value="" />
+    <property name="codeception.options.default" value="--xml --coverage-xml --coverage-html --no-colors" />
+
+    <condition property="codeception.suites" value="${codeception.suites.default}">
+        <not>
+            <isset property="codeception.suites"/>
+        </not>
+    </condition>
+
+    <condition property="codeception.options" value="${codeception.options.default}">
+        <not>
+            <isset property="codeception.options"/>
+        </not>
+    </condition>
+
+    <target name="run-tests"
+            depends="build"
+            description="Runs all tests">
+        <echo message="running codeception ${codeception.suites} ${codeception.options}" />
+        <run suites="${codeception.suites}" options="${codeception.options}"/>
+    </target>
+
+    <macrodef name="run"
+              description="Run tests">
+        <attribute name="suites" default="${codeception.suites.default}"/>
+        <attribute name="options" default="${codeception.options.default}"/>
+        <sequential>
+            <exec executable="${codeception.script}"
+                  dir="${tests.basedir}">
+                <arg value="run" />
+                <arg value="@{suites}" />
+                <arg line="@{options}" />
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <target name="build"
+            depends="script-exists"
+            unless="${codeception.script}"
+            description="Build all modules">
+        <sequential>
+            <echo message="build" />
+            <exec executable="${codeception.script}"
+                  dir="${tests.basedir}">
+                <arg value="build" />
+            </exec>
+        </sequential>
+    </target>
+
+    <target name="script-exists">
+        <available property="codeception.script.ok" file="${codeception.script}" />
+    </target>
+
+</project>

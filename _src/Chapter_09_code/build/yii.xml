@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="yii" basedir=".">
+
+    <property name="yii.script" value="${basedir}/yii"/>
+    <property name="yii.tests.script" value="${basedir}/tests/codeception/bin/yii"/>
+
+    <target name="migrate-all"
+            unless="${yii.script.ok},${yii.tests.script.ok}"
+            depends="script-exists,script-tests-exists"
+            description="Run all migrations">
+        <echo message="Run migrations"/>
+        <migrate exec="${yii.script}" action="redo"/>
+        <migrate exec="${yii.script}"/>
+        <migrate exec="${yii.tests.script}" action="redo"/>
+        <migrate exec="${yii.tests.script}"/>
+    </target>
+
+    <macrodef name="migrate"
+            description="Run migrations">
+        <attribute name="exec"/>
+        <attribute name="action" default="up"/>
+        <sequential>
+            <echo message="@{exec} migrate/@{action}" />
+            <exec executable="php" dir="${basedir}">
+                <arg value="@{exec}"/>
+                <arg value="migrate/@{action}"/>
+                <arg value="all" />
+                <arg value="--interactive=0"/>
+                <arg value="--color=0"/>
+            </exec>
+        </sequential>
+    </macrodef>
+
+    <target name="script-exists">
+        <available property="yii.script.ok" file="${yii.script}" />
+    </target>
+
+    <target name="script-tests-exists">
+        <available property="yii.tests.script.ok" file="${yii.tests.script}" />
+    </target>
+
+</project>

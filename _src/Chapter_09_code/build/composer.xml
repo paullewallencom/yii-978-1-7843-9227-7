@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- https://github.com/shrikeh/ant-phptools -->
+<project name="composer" basedir=".">
+    <dirname property="composer.basedir" file="${ant.file.composer}"/>
+
+    <target name="init"
+            unless="composer.properties">
+        <property name="composer.file" value="composer.properties" />
+        <property name="composer.file.tmp" value="composer.properties.tmp" />
+        <property name="composer.properties" location="${composer.basedir}/${composer.file}" />
+        <property file="${composer.properties}" />
+        <echo message="using composer properties from ${composer.properties}" level="debug"/>
+        <property name="composer.properties.tmp" location="${composer.basedir}/${composer.file.tmp}" />
+        <property name="composer.properties.filter" location="${composer.properties.tmp}" />
+        <echoproperties destfile="${composer.properties.filter}" prefix="composer."/>
+        <echo message="Expanded properties put into ${composer.properties.filter}" />
+    </target>
+
+    <target name="exists"
+            description="Check that composer exists">
+        <available property="composer.run" file="${composer.phar}" />
+    </target>
+
+    <!-- Self-update composer -->
+    <target name="self-update"
+            if="composer.self-update"
+            unless="composer.installed"
+            description="Self-update Composer">
+        <echo message="Self-updating composer" level="debug"/>
+        <exec executable="${composer.phar}">
+            <arg value="self-update" />
+            <arg value="--quiet" />
+            <arg value="--no-interaction" />
+        </exec>
+        <echo message="composer self-update complete" level="debug"/>
+    </target>
+
+    <target name="self-install"
+            unless="composer.run"
+            depends='exists'
+            description="Fetch Composer if it doesn't exist">
+        <echo message="Self-installing composer" level="debug"/>
+        <property name="composer.installed" value="1"/>
+        <property name="composer.run" value="1" />
+        <exec executable="/bin/bash">
+            <arg value="-c" />
+            <arg value="curl -s https://getcomposer.org/installer | php" />
+        </exec>
+        <echo message="composer self-install complete" level="debug"/>
+    </target>
+
+    <target name="composer"
+            depends="init, self-install, self-update"
+            if="composer.run">
+        <condition property="composer.command" value="update" else="install">
+            <available file="${composer.lock}"/>
+        </condition>
+        <echo message="Beginning composer ${composer.command}" level="debug" />
+        <exec executable="${composer.phar}">
+            <arg value="${composer.command}" />
+            <arg value="--no-interaction" />
+            <arg value="--optimize-autoloader" />
+            <arg value="--prefer-dist" />
+        </exec>
+        <echo message="composer ${composer.command} complete" level="debug"/>
+    </target>
+</project>

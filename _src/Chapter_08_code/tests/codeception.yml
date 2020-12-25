@@ -1,0 +1,42 @@
+actor: Tester
+paths:
+    tests: codeception
+    log: codeception/_output
+    data: codeception/_data
+    helpers: codeception/_support
+settings:
+    bootstrap: _bootstrap.php
+    suite_class: \PHPUnit_Framework_TestSuite
+    memory_limit: 1024M
+    log: true
+    colors: true
+    strict_xml: true
+config:
+    test_entry_url: https://basic-dev.yii2.sandbox/index-test.php
+coverage:
+    enabled: true
+    remote: true
+    remote_config: ../tests/codeception.yml
+    white_list:
+        include:
+            - ../models/*
+            - ../modules/v1/controllers/*
+            - ../controllers/*
+            - ../commands/*
+            - ../mail/*
+    blacklist:
+        include:
+            - ../assets/*
+            - ../build/*
+            - ../config/*
+            - ../runtime/*
+            - ../vendor/*
+            - ../views/*
+            - ../web/*
+            - ../tests/*
+    c3_url: 'https://basic-dev.yii2.sandbox/index-test.php/'
+    remote_context_options:
+        http:
+            timeout: 90
+        ssl:
+            verify_peer: false
